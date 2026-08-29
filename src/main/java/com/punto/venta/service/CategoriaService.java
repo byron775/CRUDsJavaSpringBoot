@@ -1,18 +1,23 @@
+Java
 package com.punto.venta.service;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.punto.venta.repository.CategoriaRepository;
-import com.punto.venta.dto.CategoriaDTO;
-import com.punto.venta.entity.Categoria;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
+import com.punto.venta.dto.CategoriaDTO;
+import com.punto.venta.entity.Categoria;
+import com.punto.venta.repository.CategoriaRepository;
+
 @Service
 public class CategoriaService {
-    @Autowired
-    private CategoriaRepository categoriaRepository;
+
+    private final CategoriaRepository categoriaRepository;
+
+    public CategoriaService(CategoriaRepository categoriaRepository) {
+        this.categoriaRepository = categoriaRepository;
+    }
 
     public List<CategoriaDTO> findAll() {
         return categoriaRepository.findAll()
@@ -37,10 +42,8 @@ public class CategoriaService {
     public CategoriaDTO anularCategoria(Integer idCategoria) {
         Categoria categoria = categoriaRepository.findById(idCategoria)
                 .orElseThrow(() -> new RuntimeException("La categoria no existe con id " + idCategoria));
-        CategoriaDTO categoriaDTO = new CategoriaDTO();
-        categoriaDTO.setEstado(false);
-        categoria.setEstado(categoriaDTO.getEstado());
 
+        categoria.setEstado(false);
         Categoria savedCategoria = categoriaRepository.save(categoria);
         return convertToDTO(savedCategoria);
     }
@@ -49,14 +52,22 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findById(idCategoria)
                 .orElseThrow(() -> new RuntimeException("La categoria no existe con id " + idCategoria));
 
-        categoria.setNombre(categoriaDTO.getNombre());
-        categoria.setDescripcion(categoriaDTO.getDescripcion());
+        if (categoriaDTO.getNombre() != null) {
+            categoria.setNombre(categoriaDTO.getNombre());
+        }
+        if (categoriaDTO.getDescripcion() != null) {
+            categoria.setDescripcion(categoriaDTO.getDescripcion());
+        }
+        if (categoriaDTO.getEstado() != null) {
+            categoria.setEstado(categoriaDTO.getEstado());
+        }
 
         Categoria savedCategoria = categoriaRepository.save(categoria);
         return convertToDTO(savedCategoria);
     }
 
     private CategoriaDTO convertToDTO(Categoria c) {
+        if (c == null) return null;
         CategoriaDTO dto = new CategoriaDTO();
         dto.setIdCategoria(c.getIdCategoria());
         dto.setNombre(c.getNombre());
@@ -66,11 +77,11 @@ public class CategoriaService {
     }
 
     private Categoria convertToEntity(CategoriaDTO dto) {
+        if (dto == null) return null;
         Categoria categoria = new Categoria();
         categoria.setNombre(dto.getNombre());
         categoria.setDescripcion(dto.getDescripcion());
-        categoria.setEstado(true);
+        categoria.setEstado(dto.getEstado() != null ? dto.getEstado() : true);
         return categoria;
     }
-
 }

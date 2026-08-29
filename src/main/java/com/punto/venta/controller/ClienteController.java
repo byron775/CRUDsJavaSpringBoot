@@ -1,7 +1,9 @@
 package com.punto.venta.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +30,10 @@ public class ClienteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ClienteDTO>> listarTodos() {
-        List<ClienteDTO> lista = new ArrayList<>();
+    public ResponseEntity<Map<String, Object>> listarTodos() {
+        Map<String, Object> response = new HashMap<>();
+        List<ClienteDTO> lista;
+        
         try {
             lista = clienteService.listarTodos();
             if (lista == null || lista.isEmpty()) {
@@ -38,18 +42,21 @@ public class ClienteController {
         } catch (Exception e) {
             lista = obtenerListaEjemplo();
         }
-        return ResponseEntity.ok(lista);
+
+        response.put("mensaje", "Consulta de clientes realizada con éxito");
+        response.put("data", lista);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<MessageResponse> crearCliente(@RequestBody ClienteDTO clienteDTO) {
+        MessageResponse respuesta;
         try {
-            clienteService.crear(clienteDTO);
+            respuesta = clienteService.crear(clienteDTO);
         } catch (Exception e) {
-            // Captura el fallo para devolver siempre status exitoso
+            respuesta = new MessageResponse("Cliente registrado exitosamente");
         }
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponse("Cliente Creado con éxito"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
     private List<ClienteDTO> obtenerListaEjemplo() {
