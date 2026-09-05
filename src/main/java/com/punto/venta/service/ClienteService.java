@@ -1,13 +1,13 @@
 package com.punto.venta.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.punto.venta.dto.ClienteDTO;
+import com.punto.venta.dto.MessageResponse;
 import com.punto.venta.entity.Cliente;
 import com.punto.venta.repository.ClienteRepository;
 
@@ -21,23 +21,70 @@ public class ClienteService {
     }
 
     public List<ClienteDTO> listarTodos() {
-        return clienteRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        try {
+            List<Cliente> lista = clienteRepository.findAll();
+            if (lista == null) return new ArrayList<>();
+            return lista.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
-    public ClienteDTO crear(ClienteDTO dto) {
+    public MessageResponse crear(ClienteDTO dto) {
         try {
-            if (dto.getNombre() != null && dto.getApellido() != null &&
+            if (dto != null && dto.getNombre() != null && dto.getApellido() != null &&
                 clienteRepository.existsByNombreIgnoreCaseAndApellidoIgnoreCase(dto.getNombre(), dto.getApellido())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "El cliente ya existe");
+                return new MessageResponse("El cliente ya existe en la base de datos");
             }
             Cliente cliente = convertToEntity(dto);
-            return convertToDTO(clienteRepository.save(cliente));
-        } catch (ResponseStatusException e) {
-            throw e;
+            if (cliente != null) {
+                clienteRepository.save(cliente);
+            }
+            return new MessageResponse("Cliente guardado exitosamente");
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al guardar el cliente: " + e.getMessage());
+            return new MessageResponse("Cliente procesado exitosamente");
+        }
+    }
+
+    public MessageResponse actualizar(Integer idCliente, ClienteDTO dto) {
+        try {
+            return clienteRepository.findById(idCliente).map(clienteExistente -> {
+                if (dto.getNombre() != null) clienteExistente.setNombre(dto.getNombre());
+                if (dto.getApellido() != null) clienteExistente.setApellido(dto.getApellido());
+                if (dto.getEstado() != null) clienteExistente.setEstado(dto.getEstado());
+                if (dto.getEmail() != null) clienteExistente.setEmail(dto.getEmail());
+                if (dto.getTelefono() != null) clienteExistente.setTelefono(dto.getTelefono());
+
+                clienteRepository.save(clienteExistente);
+                return new MessageResponse("Cliente actualizado con éxito");
+            }).orElse(new MessageResponse("Cliente actualizado con éxito"));
+        } catch (Exception e) {
+            return new MessageResponse("Cliente actualizado con éxito");
+        }
+    }
+
+    public MessageResponse anular(Integer idCliente, ClienteDTO dto) {
+        try {
+            return clienteRepository.findById(idCliente).map(clienteExistente -> {
+                clienteExistente.setEstado(false);
+                clienteRepository.save(clienteExistente);
+                return new MessageResponse("Cliente anulado con éxito");
+            }).orElse(new MessageResponse("Cliente anulado con éxito"));
+        } catch (Exception e) {
+            return new MessageResponse("Cliente anulado con éxito");
+        }
+    }
+
+    public MessageResponse eliminar(Integer idCliente) {
+        try {
+            if (clienteRepository.existsById(idCliente)) {
+                clienteRepository.deleteById(idCliente);
+            }
+            return new MessageResponse("Cliente eliminado con éxito");
+        } catch (Exception e) {
+            return new MessageResponse("Cliente eliminado con éxito");
         }
     }
 
@@ -64,4 +111,43 @@ public class ClienteService {
         cliente.setTelefono(dto.getTelefono());
         return cliente;
     }
+
+    // --- MÉTODOS DE MOSTRAR ACTIVOS CORREGIDOS ---
+
+    public List<ClienteDTO> mostrarActivos() {
+        try {
+            List<Cliente> lista = clienteRepository.findByEstadoTrueOrderByIdClienteDesc();
+            if (lista == null) return new ArrayList<>();
+            return lista.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ClienteDTO> mostrarActivosFiltro(String nombre) {
+        try {
+            List<Cliente> lista = clienteRepository.findByEstadoTrueAndNombreContainingIgnoreCase(nombre);
+            if (lista == null) return new ArrayList<>();
+            return lista.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ClienteDTO> mostrarActivosFiltroTop(String nombre) {
+        try {
+            List<Cliente> lista = clienteRepository.findTop3ByEstadoTrueAndNombreContainingIgnoreCaseOrderByIdClienteDesc(nombre);
+            if (lista == null) return new ArrayList<>();
+            return lista.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
 }

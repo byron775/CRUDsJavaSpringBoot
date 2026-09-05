@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +15,7 @@ import com.punto.venta.dto.CategoriaDTO;
 import com.punto.venta.service.CategoriaService;
 
 @RestController
-@RequestMapping("/categorias")
+@RequestMapping("/api/categorias")
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
@@ -33,4 +34,19 @@ public class CategoriaController {
     public CategoriaDTO createCategoria(@RequestBody CategoriaDTO categoriaDTO) {
         return categoriaService.save(categoriaDTO);
     }
+    @GetMapping("/activos")
+    public List<CategoriaDTO> mostrarActivos() {
+        return categoriaService.mostrarActivos();
+    }
+
+    @GetMapping("/activos/filtro")
+    public List<CategoriaDTO> mostrarActivosFiltro(@RequestParam String nombre) {
+        return categoriaService.mostrarActivosFiltro(nombre);
+    }
+
+    @GetMapping("/activos/filtro-top")
+    public List<CategoriaDTO> mostrarActivosFiltroTop(@RequestParam String nombre) {
+        return categoriaService.mostrarActivosFiltroTop(nombre);
+    }
 }
+

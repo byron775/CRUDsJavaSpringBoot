@@ -27,7 +27,22 @@ public class ProductoService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+    /////////////////////////////////////////// mostraaaar
+    public List<ProductoDTO> mostrarActivos() {
+        return productoRepository.findByEstadoTrueOrderByIdProductoDesc()
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
 
+    public List<ProductoDTO> mostrarActivosFiltro(String nombre) {
+        return productoRepository.findByEstadoTrueAndNombreContainingIgnoreCase(nombre)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public List<ProductoDTO> mostrarActivosFiltroTop(String nombre) {
+        return productoRepository.findTop3ByEstadoTrueAndNombreContainingIgnoreCaseOrderByIdProductoDesc(nombre)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+///////////////////////////////////////////////////////
     public ProductoDTO guardarProducto(ProductoDTO dto) {
         Producto producto = convertToEntity(dto);
         Producto guardado = productoRepository.save(producto);
@@ -42,7 +57,7 @@ public class ProductoService {
         dto.setPrecio(c.getPrecio());
         dto.setStock(c.getStock());
         
-        // Uso de getIdCategoria() en lugar de getCategoria()
+        
         if (c.getIdCategoria() != null) {
             dto.setIdCategoria(c.getIdCategoria().getIdCategoria());
         }
@@ -57,11 +72,13 @@ public class ProductoService {
         producto.setPrecio(dto.getPrecio());
         producto.setStock(dto.getStock());
         
-        // Uso de setIdCategoria(...) con expresión lambda limpia
         if (dto.getIdCategoria() != null) {
             categoriaRepository.findById(dto.getIdCategoria())
                     .ifPresent(cat -> producto.setIdCategoria(cat));
         }
+        
         return producto;
+
+        
     }
 }

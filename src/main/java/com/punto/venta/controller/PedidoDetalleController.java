@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.punto.venta.dto.MessageResponse;
@@ -21,7 +22,7 @@ import com.punto.venta.dto.PedidoDetalleDTO;
 import com.punto.venta.service.PedidoDetalleService;
 
 @RestController
-@RequestMapping("/pedido-detalles")
+@RequestMapping("/api/pedido-detalles")
 @CrossOrigin(origins = "*")
 public class PedidoDetalleController {
 
@@ -29,6 +30,21 @@ public class PedidoDetalleController {
 
     public PedidoDetalleController(PedidoDetalleService pedidoDetalleService) {
         this.pedidoDetalleService = pedidoDetalleService;
+    }
+
+    @GetMapping("/activos")
+    public List<PedidoDetalleDTO> mostrarActivos() {
+        return pedidoDetalleService.mostrarActivos();
+    }
+
+    @GetMapping("/activos/filtro")
+    public List<PedidoDetalleDTO> mostrarActivosFiltro(@RequestParam Integer idPedido) {
+        return pedidoDetalleService.mostrarActivosFiltro(idPedido);
+    }
+
+    @GetMapping("/activos/filtro-top")
+    public List<PedidoDetalleDTO> mostrarActivosFiltroTop(@RequestParam Integer idPedido) {
+        return pedidoDetalleService.mostrarActivosFiltroTop(idPedido);
     }
 
     @GetMapping

@@ -1,4 +1,3 @@
-Java
 package com.punto.venta.service;
 
 import java.util.List;
@@ -84,4 +83,22 @@ public class CategoriaService {
         categoria.setEstado(dto.getEstado() != null ? dto.getEstado() : true);
         return categoria;
     }
+
+
+    public List<CategoriaDTO> mostrarActivos() {
+        return categoriaRepository.findByEstadoTrueOrderByIdCategoriaDesc()
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public List<CategoriaDTO> mostrarActivosFiltro(String nombre) {
+        return categoriaRepository.findByEstadoTrueAndNombreContainingIgnoreCase(nombre)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public List<CategoriaDTO> mostrarActivosFiltroTop(String nombre) {
+        return categoriaRepository.findTop3ByEstadoTrueAndNombreContainingIgnoreCaseOrderByIdCategoriaDesc(nombre)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    
 }

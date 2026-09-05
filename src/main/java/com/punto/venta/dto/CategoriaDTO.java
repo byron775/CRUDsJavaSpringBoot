@@ -1,19 +1,16 @@
 package com.punto.venta.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CategoriaDTO {
+
     private Integer idCategoria;
-    private boolean estado;
     private String nombre;
     private String descripcion;
-
-    public boolean getEstado() {
-        return estado;
-    }
-
-    public void setEstado(boolean estado) {
-        this.estado = estado;
-    }
+    private Boolean estado; 
 }
